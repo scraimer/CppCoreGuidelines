@@ -12861,7 +12861,57 @@ Performance is typically dominated by memory access times.
 
 Performance is typically dominated by memory access times.
 
-???
+//// Let's imagine a CPU with a cache, and the following costs
+//// * Simple ALU operations (add, subtract, xor, compare, etc) = 1 cycle
+//// * Complex ops might take longer = 2-5 cycles
+//// * Read from the cache = 10 cycles
+//// * Read from RAM = 200 cycles
+///  ---> and then update the calculations below
+
+
+----
+Compare the following performance costs: /// these are for some Intel CPUs, who have L0, L1i, L1i, L2, L3
+
+* Simple ALU instructions: 1-3 cycles
+* Read from L1 cache into a CPU register: 5-10 cycles ???
+   * If the data is missing in L2, but present in L2, that's an L1 miss. There a penalty for an L1 miss, and then the data has to get fetched from L2.
+* Read from L2 cache: 50-75 cycles ???
+   * Just like an L1 miss, data might not be present in L2, resulting in an L2 miss.
+* Read from L3 cache: 50-75 cycles
+* Read from RAM: 200 cycles
+----
+
+There's a ratio of about 1:70 between reading from RAM and performing an ALU operation.
+?? Modern CPUs often have multiple ALUs, allowing for execution of instructions in parallel.
+
+Which means that when faced with a choice between fetching a cached value from RAM,  ...
+
+Fetching a cached result from RAM could take 70 times longer than recalculating it.
+
+Still, some computations are too expensive to redo. Those have to be stored.
+
+Accessing the caches is much faster than aceessing RAM.
+Unfortunatly, caches are smaller than RAM. We cannot store everything in the caches.
+So we have to make a trade-off.
+A value read from L1 can be read 20 times faster than it can be read from RAM.
+This implies that if we could fit all our data into L1, instead of RAM, our application could run 20 times faster!
+
+So the trick is to fit as much as we can into the place we can access the most quickly.
+
+-----
+
+Because the CPU cannot directly perform operations on values in RAM.???
+
+The CPU can only perform computations on values stored in the CPU.
+There's precious little storage space there.
+Data has to pulled from memory through a slow bottleneck, and placed into storage inside the CPU core.
+Computations on data in RAM have to wait on the data going through that bottleneck.
+
+By reducing the amount of data that has to get pushed through that bottleneck, we can reduce the time that the CPU has to delay computations.
+
+----
+
+
 
 ### <a name="Rper-access"></a>Per.19: Access memory predictably
 
